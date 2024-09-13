@@ -2,6 +2,7 @@ load("@aspect_bazel_lib//lib:diff_test.bzl", "diff_test")
 load("@aspect_bazel_lib//lib:run_binary.bzl", "run_binary")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":pull_tests.bzl", "parse_image_test")
+load("//oci:defs.bzl", "test_is_a_workdir_label")
 
 IMAGES_TO_TEST = {
     "linux/amd64": {
@@ -83,3 +84,5 @@ build_test(
 )
 
 parse_image_test(name = "parse_image_test")
+
+test_is_a_workdir_label()

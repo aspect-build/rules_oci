@@ -85,7 +85,7 @@ oci_image(
 | <a id="oci_image_rule-user"></a>user |  The <code>username</code> or <code>UID</code> which is a platform-specific structure that allows specific control over which user the process run as. This acts as a default value to use when the value is not specified when creating a container. For Linux based systems, all of the following are valid: <code>user</code>, <code>uid</code>, <code>user:group</code>, <code>uid:gid</code>, <code>uid:group</code>, <code>user:gid</code>. If <code>group/gid</code> is not specified, the default group and supplementary groups of the given <code>user/uid</code> in <code>/etc/passwd</code> from the container are applied.   | String | optional | <code>""</code> |
 | <a id="oci_image_rule-variant"></a>variant |  The variant of the specified CPU architecture. eg: <code>v6</code>, <code>v7</code>, <code>v8</code>. See: https://github.com/opencontainers/image-spec/blob/main/image-index.md#platform-variants for more.   | String | optional | <code>""</code> |
 | <a id="oci_image_rule-volumes"></a>volumes |  A file containing a comma separated list of volumes. (e.g. /srv/data,/srv/other-data)   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
-| <a id="oci_image_rule-workdir"></a>workdir |  Sets the current working directory of the <code>entrypoint</code> process in the container. This value acts as a default and may be replaced by a working directory specified when creating a container.   | String | optional | <code>""</code> |
+| <a id="oci_image_rule-workdir"></a>workdir |  A file containing the path to the current working directory of the <code>entrypoint</code> process in the container. This value acts as a default and may be replaced by a working directory specified when runninng the container.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 
 
 <a id="oci_image"></a>
@@ -93,21 +93,32 @@ oci_image(
 ## oci_image
 
 <pre>
-oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-cmd">cmd</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-exposed_ports">exposed_ports</a>, <a href="#oci_image-volumes">volumes</a>, <a href="#oci_image-kwargs">kwargs</a>)
+oci_image(<a href="#oci_image-name">name</a>, <a href="#oci_image-labels">labels</a>, <a href="#oci_image-annotations">annotations</a>, <a href="#oci_image-env">env</a>, <a href="#oci_image-cmd">cmd</a>, <a href="#oci_image-entrypoint">entrypoint</a>, <a href="#oci_image-workdir">workdir</a>, <a href="#oci_image-exposed_ports">exposed_ports</a>, <a href="#oci_image-volumes">volumes</a>, <a href="#oci_image-kwargs">kwargs</a>)
 </pre>
 
 Macro wrapper around [oci_image_rule](#oci_image_rule).
 
-Allows labels and annotations to be provided as a dictionary, in addition to a text file.
-See https://github.com/opencontainers/image-spec/blob/main/annotations.md
+This wrapper allows (some) parameters to be specified as a list or dict, or
+as a target text file containing the contents. This accomodes rules to auto
+generate some of these items.
 
-Label/annotation/env can by configured using either dict(key-&gt;value) or a file that contains key=value pairs
+Produces a target `[name].digest`, whose default output is a file containing the sha256 digest of the resulting image.
+This is similar to the same-named target created by rules_docker's `container_image` macro.
+
+**DICT_OR_LABEL**: `label`, `annotation`, `env`
+
+Can by configured using either dict(key-&gt;value) or a file that contains key=value pairs
 (one per line). The file can be preprocessed using (e.g. using `jq`) to supply external (potentially not
 deterministic) information when running with `--stamp` flag.  See the example in
 [/examples/labels/BUILD.bazel](https://github.com/bazel-contrib/rules_oci/blob/main/examples/labels/BUILD.bazel).
 
-Produces a target `[name].digest`, whose default output is a file containing the sha256 digest of the resulting image.
-This is similar to the same-named target created by rules_docker's `container_image` macro.
+**LIST_OR_LABEL**: `cmd`, `entrypoint`, `exposed_ports`, `volumes`
+
+Can be a list of strings, or a file with newlines separating entries.
+
+**STRING_OR_LABEL**: `workdir`
+
+A string, or a target text file whose output contains a single line
 
 
 **PARAMETERS**
@@ -116,13 +127,14 @@ This is similar to the same-named target created by rules_docker's `container_im
 | Name  | Description | Default Value |
 | :------------- | :------------- | :------------- |
 | <a id="oci_image-name"></a>name |  name of resulting oci_image_rule   |  none |
-| <a id="oci_image-labels"></a>labels |  Labels for the image config. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-annotations"></a>annotations |  Annotations for the image config. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-env"></a>env |  Environment variables provisioned by default to the running container. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-cmd"></a>cmd |  Command & argument configured by default in the running container. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-entrypoint"></a>entrypoint |  Entrypoint configured by default in the running container. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-exposed_ports"></a>exposed_ports |  Exposed ports in the running container. See documentation above.   |  <code>None</code> |
-| <a id="oci_image-volumes"></a>volumes |  Volumes for the container. See documentation above.   |  <code>None</code> |
+| <a id="oci_image-labels"></a>labels |  <code>DICT_OR_LABEL</code> Labels for the image config.   |  <code>None</code> |
+| <a id="oci_image-annotations"></a>annotations |  <code>DICT_OR_LABEL</code> Annotations for the image config.   |  <code>None</code> |
+| <a id="oci_image-env"></a>env |  <code>DICT_OR_LABEL</code> Environment variables provisioned by default to the running container.   |  <code>None</code> |
+| <a id="oci_image-cmd"></a>cmd |  <code>LIST_OR_LABEL</code> Command & argument configured by default in the running container.   |  <code>None</code> |
+| <a id="oci_image-entrypoint"></a>entrypoint |  <code>LIST_OR_LABEL</code> Entrypoint configured by default in the running container.   |  <code>None</code> |
+| <a id="oci_image-workdir"></a>workdir |  <code>STRING_OR_LABEL</code> Workdir configured by default in the running container.   |  <code>None</code> |
+| <a id="oci_image-exposed_ports"></a>exposed_ports |  <code>LIST_OR_LABEL</code> Exposed ports in the running container.   |  <code>None</code> |
+| <a id="oci_image-volumes"></a>volumes |  <code>LIST_OR_LABEL</code> Volumes for the container.   |  <code>None</code> |
 | <a id="oci_image-kwargs"></a>kwargs |  other named arguments to [oci_image_rule](#oci_image_rule) and [common rule attributes](https://bazel.build/reference/be/common-definitions#common-attributes).   |  none |
 
 

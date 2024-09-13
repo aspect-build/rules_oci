@@ -81,7 +81,7 @@ This acts as a default value to use when the value is not specified when creatin
 For Linux based systems, all of the following are valid: `user`, `uid`, `user:group`, `uid:gid`, `uid:group`, `user:gid`.
 If `group/gid` is not specified, the default group and supplementary groups of the given `user/uid` in `/etc/passwd` from the container are applied.
 """),
-    "workdir": attr.string(doc = "Sets the current working directory of the `entrypoint` process in the container. This value acts as a default and may be replaced by a working directory specified when creating a container."),
+    "workdir": attr.label(doc = "A file containing the path to the current working directory of the `entrypoint` process in the container. This value acts as a default and may be replaced by a working directory specified when runninng the container.", allow_single_file = True),
     "exposed_ports": attr.label(doc = "A file containing a comma separated list of exposed ports. (e.g. 2000/tcp, 3000/udp or 4000. No protocol defaults to tcp).", allow_single_file = True),
     "volumes": attr.label(doc = "A file containing a comma separated list of volumes. (e.g. /srv/data,/srv/other-data)", allow_single_file = True),
     "os": attr.string(doc = "The name of the operating system which the image is built to run on. eg: `linux`, `windows`. See $GOOS documentation for possible values: https://go.dev/doc/install/source#environment"),
@@ -227,7 +227,8 @@ def _oci_image_impl(ctx):
         args.add(ctx.attr.user, format = "--user=%s")
 
     if ctx.attr.workdir:
-        args.add(ctx.attr.workdir, format = "--workdir=%s")
+        args.add(ctx.file.workdir.path, format = "--workdir=%s")
+        inputs.append(ctx.file.workdir)
 
     action_env = {}
 

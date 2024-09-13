@@ -619,3 +619,22 @@ build_test(
         ":case10_run",
     ],
 )
+
+# Case 21: accept workdir param as a target label (string input is tested in case8)
+genrule(
+    name = "case21_workdir_target",
+    outs = ["case21_workdir_target.txt"],
+    cmd = "echo -n /workdir > $@",
+)
+
+oci_image(
+    name = "case21",
+    base = ":case8",
+    workdir = "case21_workdir_target",
+)
+
+assert_oci_config(
+    name = "test_case21",
+    image = ":case21",
+    workdir_eq = "/workdir",
+)
