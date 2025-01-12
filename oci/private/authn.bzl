@@ -275,6 +275,8 @@ To enable this feature, add `common --repo_env=OCI_ENABLE_OAUTH2_SUPPORT=1` to t
 """
 
 def _get_token(rctx, state, registry, repository):
+    if rctx.os.environ.get("OCI_DISABLE_GET_TOKEN"):
+        return {}
     pattern = _get_auth(rctx, state, registry)
 
     for registry_pattern in _WWW_AUTH.keys():
