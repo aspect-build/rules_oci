@@ -7,6 +7,13 @@ module(
 )
 
 bazel_dep(name = "aspect_bazel_lib", version = "2.7.2")
+archive_override(
+    module_name = "aspect_bazel_lib",
+    integrity = "sha256-raT3Dnx1rGi9HhpY/zgGNAcxi4LHCNdhZwDl6sQkuSQ=",
+    strip_prefix = "bazel-lib-d042d563c6a91f7e11f66c42c83429199bd3d5d9",
+    urls = ["https://github.com/bazel-contrib/bazel-lib/archive/d042d563c6a91f7e11f66c42c83429199bd3d5d9.zip"],  # 11 Dec 2024
+)
+
 bazel_dep(name = "bazel_features", version = "1.10.0")
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "platforms", version = "0.0.8")
