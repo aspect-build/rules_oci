@@ -126,6 +126,11 @@ exec "docker-credential-{}" get <<< "$1" """.format(helper_name),
 
     response = json.decode(result.stdout)
 
+    # If the username and secret are empty, the user does not have a login.
+    # Returning {} avoids sending invalid Basic auth headers that result in 401's
+    if response["Username"] == "" and response["Secret"] == "":
+        return {}
+
     return {
         "type": "basic",
         "login": response["Username"],
